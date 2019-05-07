@@ -57,18 +57,23 @@ class WorldGen:
         :param column: the current column index
         :return: (ScanState, scan_info, if_block_ended)
         """
+
+        # if we've yet to encounter a new block, see if we've found one this time
         if state is ScanState.SCANNING:
-            # mark this as a new block
+            # mark this as the start of a new block
             if tile is TileSet.BLOCK:
                 return ScanState.TRAVERSING_BLOCK, {'row': row, 'column': column, 'width': 1}, False
-            # stop scanning
+            # still haven't found anything interesting, moving on
             elif tile is TileSet.AIR:
                 return ScanState.SCANNING, scan_info, False
 
+        # if we've been iterating over contiguous block tiles, keep checking how long it goes
         elif state is ScanState.TRAVERSING_BLOCK:
+            # the block continues
             if tile is TileSet.BLOCK:
                 scan_info['width'] += 1
                 return ScanState.TRAVERSING_BLOCK, scan_info, False
+            # we've reached the end of the block, let caller know to start over
             elif tile is TileSet.AIR:
                 return ScanState.SCANNING, scan_info, True
 
