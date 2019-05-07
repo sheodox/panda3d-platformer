@@ -4,6 +4,8 @@ from enum import Enum, auto
 class TileSet:
     BLOCK = 'b'
     AIR = '.'
+    START = 's'
+    GOAL = 'g'
 
 
 class ScanState(Enum):
@@ -64,7 +66,7 @@ class WorldGen:
             if tile is TileSet.BLOCK:
                 return ScanState.TRAVERSING_BLOCK, {'row': row, 'column': column, 'width': 1}, False
             # still haven't found anything interesting, moving on
-            elif tile is TileSet.AIR:
+            elif tile is not TileSet.BLOCK:
                 return ScanState.SCANNING, scan_info, False
 
         # if we've been iterating over contiguous block tiles, keep checking how long it goes
@@ -74,7 +76,7 @@ class WorldGen:
                 scan_info['width'] += 1
                 return ScanState.TRAVERSING_BLOCK, scan_info, False
             # we've reached the end of the block, let caller know to start over
-            elif tile is TileSet.AIR:
+            elif tile is not TileSet.BLOCK:
                 return ScanState.SCANNING, scan_info, True
 
 
