@@ -14,10 +14,20 @@ class ScanState(Enum):
 
 
 class LevelParser:
+    def _assert_level_integrity(self, rows):
+        assert_prefix = '[level parser] - '
+        str_level = ''.join(rows)
+        num_s = str_level.count('s')
+        num_g = str_level.count('g')
+        assert num_s == 1, f'{assert_prefix}levels need one location for player start (s), there are {num_s}'
+        assert num_g == 1, f'{assert_prefix}levels need one location for the goal (g), there are {num_g}'
+        assert all(len(row) == len(rows[0]) for row in rows), f'{assert_prefix}all rows must be the same length'
+
     def load_level_file(self, level_name):
         with open(f'levels/{level_name}.lvl') as file:
             rows = [line.rstrip('\n') for line in file.readlines()]
-            # make it read bottom up, so row/column indices can be used as 4d space coordinates
+            self._assert_level_integrity(rows)
+            # make it read bottom up, so row/column indices can be used as 3d space coordinates
             rows.reverse()
             return self._detect_environment(rows)
 
