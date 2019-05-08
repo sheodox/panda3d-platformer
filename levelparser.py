@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from level import Level
 
 
 class TileSet:
@@ -29,7 +30,17 @@ class LevelParser:
             self._assert_level_integrity(rows)
             # make it read bottom up, so row/column indices can be used as 3d space coordinates
             rows.reverse()
-            return self._detect_environment(rows)
+            return Level(
+                blocks=self._detect_environment(rows),
+                start=self._find_char_pos(rows, TileSet.START),
+                goal=self._find_char_pos(rows, TileSet.GOAL)
+            )
+
+    def _find_char_pos(self, rows, char):
+        for r_index, row in enumerate(rows):
+            for c_index, tile in enumerate(row):
+                if tile == char:
+                    return c_index, 0, r_index
 
     def _detect_environment(self, level_text):
         blocks = []
@@ -54,7 +65,6 @@ class LevelParser:
             # don't miss out on blocks that end at the end of the row
             if scan_info['width'] > 0:
                 blocks.append(scan_info)
-        print(blocks)
         return blocks
 
     @staticmethod
