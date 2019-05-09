@@ -1,6 +1,7 @@
 import sys
 from direct.showbase.ShowBase import ShowBase, loadPrcFileData
 
+from game import Game
 from worldgen import WorldGen
 
 win_w = 1440
@@ -18,8 +19,11 @@ class Main(ShowBase):
         ShowBase.__init__(self)
         self._ticks_per_second = 60
         self.clean_up()
-        self.world_gen = WorldGen(self)
         self.load_level('level-1')
+
+    def load_level(self, name):
+        self.clean_up()
+        Game(self, name)
 
     def clean_up(self):
         # self.task_mgr.removeTasksMatching(prefix_task_name('*'))
@@ -38,10 +42,7 @@ class Main(ShowBase):
 
     def tick_task(self, fn, name):
         name = prefix_task_name(name)
-        print('TODO ADD TICK TASK')
-
-    def load_level(self, level):
-        self.world_gen.load(level)
+        print('TODO IMPLEMENT TICK TASK')
 
 
 
