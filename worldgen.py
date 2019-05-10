@@ -1,17 +1,26 @@
-from panda3d.core import TextureStage, Texture
+from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletDebugNode
+from panda3d.core import TextureStage, Texture, Vec3
 
 from levelparser import LevelParser
 
 
 class WorldGen:
-    def __init__(self, main, level_name):
+    def __init__(self, main, level_name, bullet):
         self.main = main
-        self.main.camera.set_pos(7, -49, 5)
-
+        self.bullet = bullet
         self.parser = LevelParser(level_name)
         self.level = level = self.parser.load_level_file()
         for block in level.blocks:
             self._create_block(block['pos'], block['width'])
+
+        debug_node = BulletDebugNode('Debug')
+        debug_node.showWireframe(True)
+        debug_node.showConstraints(True)
+        debug_node.showBoundingBoxes(False)
+        debug_node.showNormals(False)
+        debug_np = render.attachNewNode(debug_node)
+        debug_np.show()
+        bullet.setDebugNode(debug_np.node())
 
     def get_level(self):
         return self.level
@@ -21,6 +30,16 @@ class WorldGen:
         block.set_pos(pos)
         block.set_sx(width)
         block.reparent_to(self.main.render)
+
+        # add physics
+        b_node = BulletRigidBodyNode('ground-block')
+        b_shape = BulletBoxShape(Vec3(0.5 * width, 0.5, 0.5))
+        b_node.add_shape(b_shape)
+        b_np = render.attachNewNode(b_node)
+        # align with the block's position
+        b_np.set_pos(block.get_pos() + Vec3(0.5 * width, 0, 0.5))
+        self.bullet.attachRigidBody(b_node)
+
         self._texture_block(block, width, 'art/block.png')
 
     def _texture_block(self, np, block_width, texture_path):

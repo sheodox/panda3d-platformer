@@ -1,5 +1,6 @@
 import sys
 from direct.showbase.ShowBase import ShowBase, loadPrcFileData
+from direct.showbase.ShowBaseGlobal import globalClock
 
 from game import Game
 from worldgen import WorldGen
@@ -26,7 +27,7 @@ class Main(ShowBase):
         Game(self, name)
 
     def clean_up(self):
-        # self.task_mgr.removeTasksMatching(prefix_task_name('*'))
+        self.task_mgr.removeTasksMatching(prefix_task_name('*'))
         self.ignore_all()
         # clean up all 3d and 2d nodes
         for child in self.render.get_children():
@@ -42,9 +43,12 @@ class Main(ShowBase):
 
     def tick_task(self, fn, name):
         name = prefix_task_name(name)
-        print('TODO IMPLEMENT TICK TASK')
 
+        def tick_wrapper(task):
+            dt = globalClock.getDt()
+            return fn(dt, task)
 
+        self.task_mgr.add(tick_wrapper, name)
 
 app = Main()
 app.run()
