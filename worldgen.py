@@ -1,4 +1,4 @@
-from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletDebugNode
+from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
 from panda3d.core import TextureStage, Texture, Vec3
 
 from levelparser import LevelParser
@@ -12,15 +12,6 @@ class WorldGen:
         self.level = level = self.parser.load_level_file()
         for block in level.blocks:
             self._create_block(block['pos'], block['width'])
-
-        debug_node = BulletDebugNode('Debug')
-        debug_node.showWireframe(True)
-        debug_node.showConstraints(True)
-        debug_node.showBoundingBoxes(False)
-        debug_node.showNormals(False)
-        debug_np = render.attachNewNode(debug_node)
-        debug_np.show()
-        bullet.setDebugNode(debug_np.node())
 
     def get_level(self):
         return self.level

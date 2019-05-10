@@ -18,7 +18,7 @@ class Player(Character):
         self.main = main
         self.start_pos = start_pos
         self.bullet = bullet
-        self.move_speed_force = 10
+        self.move_speed_force = 30
         self.max_linear_velocity = 8
         self.player_actor = Actor('models/block.egg')
 
