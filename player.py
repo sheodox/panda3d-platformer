@@ -21,7 +21,7 @@ class Player(Character):
         self.max_linear_velocity = 8
         self.player_actor = Actor('models/block.egg')
         self.forces = {
-            'jump': 600,
+            'jump': 800,
             'move': 40
         }
         self.camera_move_max_delta = 0.5
@@ -53,7 +53,7 @@ class Player(Character):
     def add_physics(self):
         b_shape = BulletBoxShape(Vec3(0.5, 0.5, 0.5))
         b_node = BulletRigidBodyNode('player')
-        b_node.set_mass(1)
+        b_node.set_mass(0.5)
         b_node.add_shape(b_shape)
         b_np = render.attachNewNode(b_node)
         self.player_actor.reparent_to(b_np)
@@ -100,8 +100,10 @@ class Player(Character):
 
     def jump(self):
         actor_pos = self.actor_physics_np.get_pos()
-        rc_result = self.bullet.rayTestClosest(actor_pos, actor_pos - Vec3(0, 0, 0.6))
+        rc_result = self.bullet.rayTestClosest(actor_pos, actor_pos - Vec3(0, 0, 0.7))
 
-        if rc_result.hasHit() and rc_result.getNode().getName() == 'ground-block':
+        is_falling = self.actor_bullet_node.get_linear_velocity().z < 0
+
+        if rc_result.hasHit() and rc_result.getNode().getName() == 'ground-block' and not is_falling:
             print(rc_result.getHitNormal())
             self.actor_bullet_node.apply_central_force(Vec3(0, 0, self.forces['jump']))
