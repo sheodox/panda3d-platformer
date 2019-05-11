@@ -9,7 +9,7 @@ class Game:
     def __init__(self, main, level_name):
         self.main = main
         self.bullet = BulletWorld()
-        self.bullet.set_gravity(Vec3(0, 0, -50))
+        self.bullet.set_gravity(Vec3(0, 0, -30))
 
         self.world_gen = WorldGen(main, level_name, self.bullet)
         self.level = self.world_gen.get_level()

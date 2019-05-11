@@ -18,9 +18,16 @@ class Player(Character):
         self.main = main
         self.start_pos = start_pos
         self.bullet = bullet
-        self.move_speed_force = 30
         self.max_linear_velocity = 8
         self.player_actor = Actor('models/block.egg')
+        self.forces = {
+            'jump': 600,
+            'move': 40
+        }
+        self.camera_move_max_delta = 0.5
+
+        # units forward the camera should be pointed so more in front of the player is shown
+        self.camera_side_lookahead = 2
 
         self.add_physics()
         self.main.frame_task(self.frame, 'player-controls')
@@ -31,7 +38,17 @@ class Player(Character):
         return task.cont
 
     def center_camera(self):
-        self.main.camera.setPos(self.actor_physics_np.get_pos() + Vec3(0, -25, 0))
+        goal_pos = self.actor_physics_np.get_pos() + Vec3(self.camera_side_lookahead, -25, 3)
+        def clamp_axis(num):
+            return clamp(-self.camera_move_max_delta, self.camera_move_max_delta, num)
+        cam_pos = self.main.camera.get_pos()
+        pos_diff = goal_pos - cam_pos
+        self.main.camera.setPos(
+            cam_pos.x + clamp_axis(pos_diff.x),
+            goal_pos.y,
+            cam_pos.z + clamp_axis(pos_diff.z),
+        )
+        print(self.main.camera.get_pos())
 
     def add_physics(self):
         b_shape = BulletBoxShape(Vec3(0.5, 0.5, 0.5))
@@ -45,10 +62,10 @@ class Player(Character):
         # move to start pos, plus a little height so it can be right on the ground without jumping out of the ground
         self.actor_physics_np = b_np
         b_np.set_pos(Vec3(self.start_pos) + Vec3(0, 0, 0.01))
-        self.actor_physics = b_node
-        self.actor_physics.set_angular_factor(Vec3(0, 0, 0))
-        self.actor_physics.set_linear_factor(Vec3(1, 0, 1))
-        self.actor_physics.set_linear_sleep_threshold(0)
+        self.actor_bullet_node = b_node
+        self.actor_bullet_node.set_angular_factor(Vec3(0, 0, 0))
+        self.actor_bullet_node.set_linear_factor(Vec3(1, 0, 1))
+        self.actor_bullet_node.set_linear_sleep_threshold(0)
         self.bullet.attachRigidBody(b_node)
 
     def controls(self):
@@ -64,21 +81,27 @@ class Player(Character):
             self.jump()
 
         # limit movement speed
-        vel = self.actor_physics.get_linear_velocity()
+        vel = self.actor_bullet_node.get_linear_velocity()
         mn = -self.max_linear_velocity
         mx = self.max_linear_velocity
-        self.actor_physics.set_linear_velocity((
+        self.actor_bullet_node.set_linear_velocity((
             clamp(mn, mx, vel.x),
             0,
             clamp(mn, mx, vel.z)
         ))
 
     def move_left(self):
-        self.actor_physics.apply_central_force(Vec3(-self.move_speed_force, 0, 0))
+        self.actor_bullet_node.apply_central_force(Vec3(-self.forces['move'], 0, 0))
+        self.camera_side_lookahead = -abs(self.camera_side_lookahead)
 
     def move_right(self):
-        self.actor_physics.apply_central_force(Vec3(self.move_speed_force, 0, 0))
+        self.actor_bullet_node.apply_central_force(Vec3(self.forces['move'], 0, 0))
+        self.camera_side_lookahead = abs(self.camera_side_lookahead)
 
     def jump(self):
-        # todo verify they're on the ground
-        self.actor_physics.apply_central_force(Vec3(0, 0, 150))
+        actor_pos = self.actor_physics_np.get_pos()
+        rc_result = self.bullet.rayTestClosest(actor_pos, actor_pos - Vec3(0, 0, 0.6))
+
+        if rc_result.hasHit() and rc_result.getNode().getName() == 'ground-block':
+            print(rc_result.getHitNormal())
+            self.actor_bullet_node.apply_central_force(Vec3(0, 0, self.forces['jump']))
