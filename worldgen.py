@@ -14,7 +14,7 @@ class WorldGen:
             self._create_block(block['pos'], block['width'])
 
         # kill plane
-        kill_plane_shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
+        kill_plane_shape = BulletPlaneShape(Vec3(0, 0, 1), -2)
         kill_plane_ghost = BulletGhostNode('kill-plane-ghost')
         kill_plane_ghost.add_shape(kill_plane_shape)
         self.kill_plane = render.attachNewNode(kill_plane_ghost)

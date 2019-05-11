@@ -18,6 +18,7 @@ def prefix_task_name(name):
 class Main(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
+        self.set_background_color(0.2, 0.8, 1)
         self._ticks_per_second = 60
         self.clean_up()
         self.load_level('level-1')

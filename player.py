@@ -53,7 +53,7 @@ class Player(Character):
         self.main.camera.setPos(
             cam_pos.x + clamp_axis(pos_diff.x),
             goal_pos.y,
-            max(5, cam_pos.z + clamp_axis(pos_diff.z)),
+            max(7.5, cam_pos.z + clamp_axis(pos_diff.z)),
         )
 
     def add_physics(self):
