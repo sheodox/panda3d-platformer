@@ -20,6 +20,7 @@ class Player(Character):
         self.bullet = bullet
         self.max_linear_velocity = 8
         self.player_actor = Actor('models/block.egg')
+        self.player_actor.set_sx(0.5)
         self.forces = {
             'jump': 800,
             'move': 40
@@ -50,14 +51,14 @@ class Player(Character):
         )
 
     def add_physics(self):
-        b_shape = BulletBoxShape(Vec3(0.5, 0.5, 0.5))
+        b_shape = BulletBoxShape(Vec3(0.25, 0.5, 0.5))
         b_node = BulletRigidBodyNode('player')
         b_node.set_mass(0.5)
         b_node.add_shape(b_shape)
         b_np = render.attachNewNode(b_node)
         self.player_actor.reparent_to(b_np)
         # correct for model offset
-        self.player_actor.set_pos(-0.5, 0, -0.5)
+        self.player_actor.set_pos(-0.25, 0, -0.5)
         # move to start pos, plus a little height so it can be right on the ground without jumping out of the ground
         self.actor_physics_np = b_np
         b_np.set_pos(Vec3(self.start_pos) + Vec3(0, 0, 0.01))
