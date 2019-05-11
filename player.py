@@ -48,7 +48,6 @@ class Player(Character):
             goal_pos.y,
             cam_pos.z + clamp_axis(pos_diff.z),
         )
-        print(self.main.camera.get_pos())
 
     def add_physics(self):
         b_shape = BulletBoxShape(Vec3(0.5, 0.5, 0.5))
@@ -105,5 +104,4 @@ class Player(Character):
         is_falling = self.actor_bullet_node.get_linear_velocity().z < 0
 
         if rc_result.hasHit() and rc_result.getNode().getName() == 'ground-block' and not is_falling:
-            print(rc_result.getHitNormal())
             self.actor_bullet_node.apply_central_force(Vec3(0, 0, self.forces['jump']))
