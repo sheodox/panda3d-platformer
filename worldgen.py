@@ -13,12 +13,24 @@ class WorldGen:
         for block in level.blocks:
             self._create_block(block['pos'], block['width'])
 
+        # kill plane
         kill_plane_shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
         kill_plane_ghost = BulletGhostNode('kill-plane-ghost')
         kill_plane_ghost.add_shape(kill_plane_shape)
         self.kill_plane = render.attachNewNode(kill_plane_ghost)
         self.kill_plane.set_pos((0, 0, -2))
         self.kill_plane_node = kill_plane_ghost
+
+        # goal
+        goal_model = loader.load_model('models/goal-flag.egg')
+        self.goal_node = BulletGhostNode('goal')
+        goal_shape = BulletBoxShape(Vec3(0.5, 0.5, 2))
+        self.goal_node.add_shape(goal_shape)
+        goal_bullet_np = render.attachNewNode(self.goal_node)
+        goal_bullet_np.set_pos(self.level.goal)
+        goal_model.reparent_to(goal_bullet_np)
+        # self.bullet.attachRigidBody(self.goal_bullet_node)
+
 
     def get_level(self):
         return self.level
