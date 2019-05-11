@@ -18,6 +18,7 @@ class Player(Character):
         self.main = main
         self.start_pos = start_pos
         self.bullet = bullet
+        self.controls_enabled = True
         self.max_linear_velocity = 8
         self.player_actor = Actor('models/block.egg')
         self.player_actor.set_sx(0.5)
@@ -33,13 +34,17 @@ class Player(Character):
         self.add_physics()
         self.main.frame_task(self.frame, 'player-controls')
 
+    def disable(self):
+        self.controls_enabled = False
+
     def respawn(self):
         self.actor_bullet_np.set_pos(self.start_pos)
         self.actor_bullet_node.set_linear_velocity((0, 0, 0))
 
     def frame(self, task):
-        self.controls()
-        self.center_camera()
+        if self.controls_enabled:
+            self.controls()
+            self.center_camera()
         return task.cont
 
     def center_camera(self):

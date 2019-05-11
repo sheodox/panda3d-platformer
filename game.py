@@ -13,7 +13,7 @@ class Game:
         self.bullet.set_gravity(Vec3(0, 0, -30))
 
         self.ui = GameUI()
-        self.ui_data = {
+        self.game_data = {
             'coins': 0,
             'lives': 3,
             'time': 300
@@ -48,16 +48,18 @@ class Game:
 
     def won(self):
         self.ui.show_win()
+        self.player.disable()
 
     def lost(self):
         self.ui.show_lose()
+        self.player.disable()
 
     def update(self, dt, task):
         self.bullet.doPhysics(dt)
         kill_check = self.bullet.contact_test_pair(self.world_gen.kill_plane_node, self.player.actor_bullet_node)
         if kill_check.get_num_contacts() == 1:
-            self.ui_data['lives'] -= 1
-            if self.ui_data['lives'] == 0:
+            self.game_data['lives'] -= 1
+            if self.game_data['lives'] == 0:
                 self.lost()
             self.player.respawn()
 
@@ -65,5 +67,5 @@ class Game:
         if win_check.get_num_contacts() == 1:
             self.won()
 
-        self.ui.update(self.ui_data)
+        self.ui.update(self.game_data)
         return task.cont
