@@ -39,9 +39,10 @@ class Game:
         self.bullet.setDebugNode(debug_np.node())
         self.main.accept('f3', toggle_debug)
 
-    def spawn_character(self):
-        pass
 
     def update(self, dt, task):
         self.bullet.doPhysics(dt)
+        kill_check = self.bullet.contact_test_pair(self.world_gen.kill_plane_node, self.player.actor_bullet_node)
+        if kill_check.get_num_contacts() == 1:
+            self.player.respawn()
         return task.cont

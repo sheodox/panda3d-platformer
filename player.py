@@ -33,15 +33,21 @@ class Player(Character):
         self.add_physics()
         self.main.frame_task(self.frame, 'player-controls')
 
+    def respawn(self):
+        self.actor_bullet_np.set_pos(self.start_pos)
+        self.actor_bullet_node.set_linear_velocity((0, 0, 0))
+
     def frame(self, task):
         self.controls()
         self.center_camera()
         return task.cont
 
     def center_camera(self):
-        goal_pos = self.actor_physics_np.get_pos() + Vec3(self.camera_side_lookahead, -25, 3)
+        goal_pos = self.actor_bullet_np.get_pos() + Vec3(self.camera_side_lookahead, -25, 3)
+
         def clamp_axis(num):
             return clamp(-self.camera_move_max_delta, self.camera_move_max_delta, num)
+
         cam_pos = self.main.camera.get_pos()
         pos_diff = goal_pos - cam_pos
         self.main.camera.setPos(
@@ -60,7 +66,7 @@ class Player(Character):
         # correct for model offset
         self.player_actor.set_pos(-0.25, 0, -0.5)
         # move to start pos, plus a little height so it can be right on the ground without jumping out of the ground
-        self.actor_physics_np = b_np
+        self.actor_bullet_np = b_np
         b_np.set_pos(Vec3(self.start_pos) + Vec3(0, 0, 0.01))
         self.actor_bullet_node = b_node
         self.actor_bullet_node.set_angular_factor(Vec3(0, 0, 0))
@@ -99,7 +105,8 @@ class Player(Character):
         self.camera_side_lookahead = abs(self.camera_side_lookahead)
 
     def jump(self):
-        actor_pos = self.actor_physics_np.get_pos()
+        actor_pos = self.actor_bullet_np.get_pos()
+        # raycast below to see if they're over the ground, with a little extra wiggle room so holding jump jumps higher
         rc_result = self.bullet.rayTestClosest(actor_pos, actor_pos - Vec3(0, 0, 1.1))
 
         is_falling = self.actor_bullet_node.get_linear_velocity().z < 0

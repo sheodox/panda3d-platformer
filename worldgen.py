@@ -1,4 +1,4 @@
-from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
+from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletPlaneShape, BulletGhostNode
 from panda3d.core import TextureStage, Texture, Vec3
 
 from levelparser import LevelParser
@@ -12,6 +12,13 @@ class WorldGen:
         self.level = level = self.parser.load_level_file()
         for block in level.blocks:
             self._create_block(block['pos'], block['width'])
+
+        kill_plane_shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
+        kill_plane_ghost = BulletGhostNode('kill-plane-ghost')
+        kill_plane_ghost.add_shape(kill_plane_shape)
+        self.kill_plane = render.attachNewNode(kill_plane_ghost)
+        self.kill_plane.set_pos((0, 0, -2))
+        self.kill_plane_node = kill_plane_ghost
 
     def get_level(self):
         return self.level
