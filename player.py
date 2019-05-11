@@ -100,7 +100,7 @@ class Player(Character):
 
     def jump(self):
         actor_pos = self.actor_physics_np.get_pos()
-        rc_result = self.bullet.rayTestClosest(actor_pos, actor_pos - Vec3(0, 0, 0.7))
+        rc_result = self.bullet.rayTestClosest(actor_pos, actor_pos - Vec3(0, 0, 1.1))
 
         is_falling = self.actor_bullet_node.get_linear_velocity().z < 0
 
