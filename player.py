@@ -87,6 +87,10 @@ class Player(Character):
             self.move_left()
         elif is_down(right_button):
             self.move_right()
+        else:
+            # stop moving faster
+            vel = self.actor_bullet_node.get_linear_velocity()
+            self.actor_bullet_node.set_linear_velocity((vel.x * 0.9, 0, vel.z))
 
         if is_down(jump_button):
             self.jump()
