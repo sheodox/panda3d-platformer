@@ -1,3 +1,6 @@
+import time
+
+from math import floor
 from panda3d.bullet import BulletWorld, BulletDebugNode
 from panda3d.core import Vec3, OrthographicLens, NodePath
 
@@ -11,12 +14,14 @@ class Game:
         self.main = main
         self.bullet = BulletWorld()
         self.bullet.set_gravity(Vec3(0, 0, -30))
+        self.start_time = time.time()
 
         self.ui = GameUI()
+        self.time_max = 300
         self.game_data = {
             'coins': 0,
             'lives': 3,
-            'time': 300
+            'time': self.time_max
         }
         self.world_gen = WorldGen(main, level_name, self.bullet)
         self.level = self.world_gen.get_level()
@@ -78,6 +83,10 @@ class Game:
                 self.game_data['coins'] = 0
                 self.game_data['lives'] += 1
 
+        # show full numbers, don't allow going below zero
+        self.game_data['time'] = max(0, floor(self.time_max - (time.time() - self.start_time)))
+        if self.game_data['time'] == 0:
+            self.lost()
 
         self.ui.update(self.game_data)
         return task.cont
