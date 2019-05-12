@@ -1,5 +1,5 @@
 from panda3d.bullet import BulletWorld, BulletDebugNode
-from panda3d.core import Vec3, OrthographicLens
+from panda3d.core import Vec3, OrthographicLens, NodePath
 
 from gameui import GameUI
 from player import Player
@@ -66,6 +66,18 @@ class Game:
         win_check = self.bullet.contact_test_pair(self.world_gen.goal_node, self.player.actor_bullet_node)
         if win_check.get_num_contacts() == 1:
             self.won()
+
+        coin_check = self.bullet.contact_test(self.player.actor_bullet_node)
+        for contact in coin_check.get_contacts():
+            node = contact.getNode1()
+            if node.getName() == 'coin':
+                self.game_data['coins'] += 1
+                self.world_gen.remove_coin(node)
+
+            if self.game_data['coins'] == 100:
+                self.game_data['coins'] = 0
+                self.game_data['lives'] += 1
+
 
         self.ui.update(self.game_data)
         return task.cont

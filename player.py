@@ -29,7 +29,7 @@ class Player(Character):
         self.camera_move_max_delta = 0.5
 
         # units forward the camera should be pointed so more in front of the player is shown
-        self.camera_side_lookahead = 2
+        self.camera_side_lookahead = 1
 
         self.add_physics()
         self.main.frame_task(self.frame, 'player-controls')

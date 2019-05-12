@@ -7,6 +7,7 @@ class TileSet:
     AIR = '.'
     START = 's'
     GOAL = 'g'
+    COIN = 'c'
 
 
 class ScanState(Enum):
@@ -36,7 +37,8 @@ class LevelParser:
             return Level(
                 blocks=self._detect_environment(rows),
                 start=self._find_char_pos(rows, TileSet.START),
-                goal=self._find_char_pos(rows, TileSet.GOAL)
+                goal=self._find_char_pos(rows, TileSet.GOAL),
+                coins=self._find_all_char_pos(rows, TileSet.COIN)
             )
 
     def _find_char_pos(self, rows, char):
@@ -44,6 +46,14 @@ class LevelParser:
             for c_index, tile in enumerate(row):
                 if tile == char:
                     return c_index, 0, r_index
+
+    def _find_all_char_pos(self, rows, char):
+        positions = []
+        for r_index, row in enumerate(rows):
+            for c_index, tile in enumerate(row):
+                if tile == char:
+                    positions.append((c_index, 0, r_index))
+        return positions
 
     def _detect_environment(self, level_text):
         blocks = []

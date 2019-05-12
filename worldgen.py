@@ -1,5 +1,5 @@
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletPlaneShape, BulletGhostNode
-from panda3d.core import TextureStage, Texture, Vec3
+from panda3d.core import TextureStage, Texture, Vec3, Material, PointLight, VBase4, AmbientLight
 
 from levelparser import LevelParser
 
@@ -8,11 +8,53 @@ class WorldGen:
     def __init__(self, main, level_name, bullet):
         self.main = main
         self.bullet = bullet
+        self.coin_nps = {}
         self.parser = LevelParser(level_name)
         self.level = level = self.parser.load_level_file()
         for block in level.blocks:
             self._create_block(block['pos'], block['width'])
 
+        self._create_kill_plane()
+        self._create_goal()
+        self._create_coins()
+
+        self.main.tick_task(self._rotate_coins, 'worldgen-coin-rotate')
+
+        alight = AmbientLight('alight')
+        alight.setColor(VBase4(1, 1, 1, 1))
+        alnp = render.attachNewNode(alight)
+        render.set_light(alnp)
+
+    def _rotate_coins(self, dt, task):
+        for np in render.findAllMatches('coin'):
+            np.set_hpr(np.get_hpr() + (300 * dt, 0, 0))
+        return task.cont
+
+    def _create_coins(self):
+        coin_mat = Material()
+        coin_mat.set_ambient((1, 0.9, 0.2, 1))
+        coin_mat.set_shininess(5.0)
+
+        for coin_pos in self.level.coins:
+            coin_model = loader.loadModelCopy('models/coin.egg')
+            coin_model.set_material(coin_mat)
+
+            coin_node = BulletGhostNode('coin')
+            coin_shape = BulletBoxShape(Vec3(0.4, 0.5, 0.4))
+            coin_node.add_shape(coin_shape)
+            coin_np = render.attachNewNode(coin_node)
+            coin_np.set_pos(coin_pos)
+            coin_model.reparent_to(coin_np)
+            self.bullet.attachGhost(coin_node)
+
+            self.coin_nps[coin_node] = coin_np
+
+    def remove_coin(self, node):
+        self.bullet.removeGhost(node)
+        self.coin_nps[node].remove_node()
+        del self.coin_nps[node]
+
+    def _create_kill_plane(self):
         # kill plane
         kill_plane_shape = BulletPlaneShape(Vec3(0, 0, 1), -2)
         kill_plane_ghost = BulletGhostNode('kill-plane-ghost')
@@ -21,6 +63,7 @@ class WorldGen:
         self.kill_plane.set_pos((0, 0, -2))
         self.kill_plane_node = kill_plane_ghost
 
+    def _create_goal(self):
         # goal
         goal_model = loader.load_model('models/goal-flag.egg')
         self.goal_node = BulletGhostNode('goal')
@@ -29,7 +72,6 @@ class WorldGen:
         goal_bullet_np = render.attachNewNode(self.goal_node)
         goal_bullet_np.set_pos(self.level.goal)
         goal_model.reparent_to(goal_bullet_np)
-        # self.bullet.attachRigidBody(self.goal_bullet_node)
 
 
     def get_level(self):
