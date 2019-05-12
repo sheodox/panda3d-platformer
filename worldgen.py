@@ -43,7 +43,7 @@ class WorldGen:
             coin_shape = BulletBoxShape(Vec3(0.4, 0.5, 0.4))
             coin_node.add_shape(coin_shape)
             coin_np = render.attachNewNode(coin_node)
-            coin_np.set_pos(coin_pos)
+            coin_np.set_pos(Vec3(0.5, 0, 0.5) + coin_pos)
             coin_model.reparent_to(coin_np)
             self.bullet.attachGhost(coin_node)
 
