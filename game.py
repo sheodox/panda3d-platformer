@@ -12,6 +12,7 @@ from worldgen import WorldGen
 class Game:
     def __init__(self, main, level_name):
         self.main = main
+        self.paused = False
         self.bullet = BulletWorld()
         self.bullet.set_gravity(Vec3(0, 0, -30))
         self.start_time = time.time()
@@ -26,7 +27,7 @@ class Game:
         self.world_gen = WorldGen(main, level_name, self.bullet)
         self.level = self.world_gen.get_level()
         self.main.tick_task(self.update, 'game-update')
-        self.player = Player(main, self.level.start, self.bullet)
+        self.player = Player(main, self.level.start, self.bullet, self)
         self.main.disable_mouse()
 
         lens = OrthographicLens()
@@ -52,12 +53,12 @@ class Game:
         self.main.accept('f3', toggle_debug)
 
     def won(self):
+        self.paused = True
         self.ui.show_win()
-        self.player.disable()
 
     def lost(self):
+        self.paused = True
         self.ui.show_lose()
-        self.player.disable()
 
     def update(self, dt, task):
         self.bullet.doPhysics(dt)
@@ -84,9 +85,10 @@ class Game:
                 self.game_data['lives'] += 1
 
         # show full numbers, don't allow going below zero
-        self.game_data['time'] = max(0, floor(self.time_max - (time.time() - self.start_time)))
-        if self.game_data['time'] == 0:
-            self.lost()
+        if not self.paused:
+            self.game_data['time'] = max(0, floor(self.time_max - (time.time() - self.start_time)))
+            if self.game_data['time'] == 0:
+                self.lost()
 
         self.ui.update(self.game_data)
         return task.cont
