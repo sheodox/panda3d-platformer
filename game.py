@@ -30,8 +30,12 @@ class Game:
         self.player = Player(main, self.level.start, self.bullet, self)
         self.main.disable_mouse()
 
+        camera_width_base = 15
+        aspect = 16 / 9
+        self.camera_diameter = camera_width_base * aspect
         lens = OrthographicLens()
-        lens.set_film_size(15 * 16 / 9, 15)
+        lens.set_film_size(self.camera_diameter, camera_width_base)
+
         self.main.cam.node().setLens(lens)
         self.init_debug()
 
@@ -92,6 +96,8 @@ class Game:
             self.game_data['time'] = max(0, floor(self.time_max - (time.time() - self.start_time)))
             if self.game_data['time'] == 0:
                 self.lost()
+
+        self.world_gen.activate_enemies(self.camera_diameter, self.main.camera.get_pos())
 
         self.ui.update(self.game_data)
         return task.cont

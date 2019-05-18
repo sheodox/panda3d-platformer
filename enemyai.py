@@ -60,7 +60,7 @@ class EnemyAI(AI):
         self.bullet.removeRigidBody(self.bullet_node)
 
     def move(self, dt):
-        if self.dead:
+        if self.dead or not self.activated:
             return
         self.check_for_obstacles()
         vel = self.bullet_node.get_linear_velocity()

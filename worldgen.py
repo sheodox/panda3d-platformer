@@ -11,7 +11,8 @@ class WorldGen:
         self.bullet = bullet
         self.coin_nps = {}
         self.enemies = []
-        self.enemy_map = {}
+        self.enemy_bullet_map = {}
+        self.enemy_np_map = {}
         self.parser = LevelParser(level_name)
         self.level = level = self.parser.load_level_file()
         for block in level.blocks:
@@ -33,7 +34,8 @@ class WorldGen:
         for pos in self.level.enemies:
             enemy = EnemyAI(pos, self.bullet)
             self.enemies.append(enemy)
-            self.enemy_map[enemy.bullet_node] = enemy
+            self.enemy_bullet_map[enemy.bullet_node] = enemy
+            self.enemy_np_map[enemy.bullet_np] = enemy
 
     def update(self, dt, task):
         for np in render.findAllMatches('coin'):
@@ -42,6 +44,13 @@ class WorldGen:
         for enemy in self.enemies:
             enemy.update(dt)
         return task.cont
+
+    def activate_enemies(self, cam_diameter, cam_pos):
+        cam_radius = cam_diameter / 2
+        for enemy_np in render.findAllMatches('enemy'):
+            enemy_x = enemy_np.get_x()
+            if cam_pos.x - cam_radius <= enemy_x <= cam_pos.x + cam_radius:
+                self.enemy_np_map[enemy_np].activate()
 
     def _create_coins(self):
         coin_mat = Material()
@@ -68,7 +77,7 @@ class WorldGen:
         del self.coin_nps[node]
 
     def kill_enemy(self, node):
-        self.enemy_map[node].died()
+        self.enemy_bullet_map[node].died()
 
     def _create_kill_plane(self):
         # kill plane
