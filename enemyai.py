@@ -15,10 +15,10 @@ class EnemyAI(AI):
 
         def make_walk_interval(texture1, texture2):
             return Sequence(
-                Wait(0.2),
                 Func(self.set_texture, loader.load_texture(texture1)),
                 Wait(0.2),
-                Func(self.set_texture, loader.load_texture(texture2))
+                Func(self.set_texture, loader.load_texture(texture2)),
+                Wait(0.2)
             )
 
         self.walking_right_interval = make_walk_interval('art/enemy-walk-right-1.png', 'art/enemy-walk-right-2.png')
