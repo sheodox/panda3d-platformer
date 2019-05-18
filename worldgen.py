@@ -1,6 +1,7 @@
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode, BulletPlaneShape, BulletGhostNode
 from panda3d.core import TextureStage, Texture, Vec3, Material, PointLight, VBase4, AmbientLight
 
+from enemyai import EnemyAI
 from levelparser import LevelParser
 
 
@@ -9,6 +10,7 @@ class WorldGen:
         self.main = main
         self.bullet = bullet
         self.coin_nps = {}
+        self.enemies = []
         self.parser = LevelParser(level_name)
         self.level = level = self.parser.load_level_file()
         for block in level.blocks:
@@ -17,17 +19,25 @@ class WorldGen:
         self._create_kill_plane()
         self._create_goal()
         self._create_coins()
+        self._create_enemies()
 
-        self.main.tick_task(self._rotate_coins, 'worldgen-coin-rotate')
+        self.main.tick_task(self.update, 'worldgen-update')
 
         alight = AmbientLight('alight')
         alight.setColor(VBase4(1, 1, 1, 1))
         alnp = render.attachNewNode(alight)
         render.set_light(alnp)
 
-    def _rotate_coins(self, dt, task):
+    def _create_enemies(self):
+        for pos in self.level.enemies:
+            self.enemies.append(EnemyAI(pos, self.bullet))
+
+    def update(self, dt, task):
         for np in render.findAllMatches('coin'):
             np.set_hpr(np.get_hpr() + (300 * dt, 0, 0))
+
+        for enemy in self.enemies:
+            enemy.update(dt)
         return task.cont
 
     def _create_coins(self):

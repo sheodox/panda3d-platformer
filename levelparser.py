@@ -8,6 +8,7 @@ class TileSet:
     START = 's'
     GOAL = 'g'
     COIN = 'c'
+    ENEMY = 'e'
 
 
 class ScanState(Enum):
@@ -38,7 +39,8 @@ class LevelParser:
                 blocks=self._detect_environment(rows),
                 start=self._find_char_pos(rows, TileSet.START),
                 goal=self._find_char_pos(rows, TileSet.GOAL),
-                coins=self._find_all_char_pos(rows, TileSet.COIN)
+                coins=self._find_all_char_pos(rows, TileSet.COIN),
+                enemies=self._find_all_char_pos(rows, TileSet.ENEMY)
             )
 
     def _find_char_pos(self, rows, char):
