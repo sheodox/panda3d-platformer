@@ -38,6 +38,9 @@ class Game:
 
         self.main.cam.node().setLens(lens)
         self.init_debug()
+        self.sfx_death = loader.loadSfx('sounds/death.wav')
+        self.sfx_extra_life = loader.loadSfx('sounds/extra-life.wav')
+        self.sfx_collect_coin = loader.loadSfx('sounds/collect.wav')
 
     def init_debug(self):
         debug_node = BulletDebugNode('Debug')
@@ -68,7 +71,13 @@ class Game:
         self.paused = True
         self.ui.show_lose()
 
+        self.main.later_task(self.to_main_menu, 'main-menu', 2)
+
+    def to_main_menu(self, task):
+        self.main.main_menu()
+
     def died(self):
+        self.sfx_death.play()
         self.game_data['lives'] -= 1
         if self.game_data['lives'] == 0:
             self.lost()
@@ -90,10 +99,12 @@ class Game:
             if node.getName() == 'coin':
                 self.game_data['coins'] += 1
                 self.world_gen.remove_coin(node)
+                self.sfx_collect_coin.play()
 
             if self.game_data['coins'] == 100:
                 self.game_data['coins'] = 0
                 self.game_data['lives'] += 1
+                self.sfx_extra_life.play()
 
         # show full numbers, don't allow going below zero
         if not self.paused:

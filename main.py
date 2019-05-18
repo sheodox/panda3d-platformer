@@ -27,10 +27,13 @@ class Main(ShowBase):
         self.levels = os.listdir('levels')
         self.levels.sort()
         self.level_index = 0
-        MenuUI().show_main_menu(self.start_game)
+        self.main_menu()
 
     def start_game(self):
         self.load_level(self.levels[self.level_index])
+
+    def main_menu(self):
+        MenuUI().show_main_menu(self.start_game)
 
     def next_level(self, stats):
         self.game_stats = stats

@@ -42,6 +42,7 @@ class EnemyAI(AI):
         self.model.reparent_to(self.bullet_np)
         self.bullet.attachRigidBody(self.bullet_node)
         self.set_texture(self.idle_texture)
+        self.sfx_death = loader.loadSfx('sounds/enemy-death.wav')
 
     def set_texture(self, texture):
         self.model.set_texture(texture)
@@ -58,6 +59,7 @@ class EnemyAI(AI):
         self.dead = True
         self.bullet_np.remove_node()
         self.bullet.removeRigidBody(self.bullet_node)
+        self.sfx_death.play()
 
     def move(self, dt):
         if self.dead or not self.activated:

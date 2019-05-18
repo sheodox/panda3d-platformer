@@ -1,3 +1,5 @@
+import time
+
 from direct.actor.Actor import Actor, Vec3, KeyboardButton
 from panda3d.bullet import BulletBoxShape, BulletRigidBodyNode
 
@@ -33,6 +35,8 @@ class Player(Character):
 
         self.add_physics()
         self.main.frame_task(self.frame, 'player-controls')
+        self.sfx_jump = loader.loadSfx('sounds/jump.wav')
+        self.last_played_jump_sfx = 0
 
     def respawn(self):
         self.actor_bullet_np.set_pos(self.start_pos)
@@ -70,9 +74,8 @@ class Player(Character):
             if down_collision == 'enemy':
                 self.game.world_gen.kill_enemy(killed_enemy)
                 vel = self.actor_bullet_node.get_linear_velocity()
-                self.actor_bullet_node.set_linear_velocity((
-                    vel.x, 0, 40
-            ))
+                self.actor_bullet_node.set_linear_velocity((vel.x, 0, 40))
+                self.play_jump_sfx()
 
     def center_camera(self):
         goal_pos = self.actor_bullet_np.get_pos() + Vec3(self.camera_side_lookahead, -25, 3)
@@ -140,6 +143,12 @@ class Player(Character):
         self.actor_bullet_node.apply_central_force(Vec3(self.forces['move'], 0, 0))
         self.camera_side_lookahead = abs(self.camera_side_lookahead)
 
+    def play_jump_sfx(self):
+        now = time.time()
+        if now - self.last_played_jump_sfx > 0.1:
+            self.sfx_jump.play()
+            self.last_played_jump_sfx = now
+
     def jump(self):
         actor_pos = self.actor_bullet_np.get_pos()
         # raycast below to see if they're over the ground, with a little extra wiggle room so holding jump jumps higher
@@ -149,3 +158,4 @@ class Player(Character):
 
         if rc_result.hasHit() and rc_result.getNode().getName() == 'ground-block' and not is_falling:
             self.actor_bullet_node.apply_central_force(Vec3(0, 0, self.forces['jump']))
+            self.play_jump_sfx()
