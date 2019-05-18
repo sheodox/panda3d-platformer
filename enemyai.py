@@ -11,18 +11,20 @@ class EnemyAI(AI):
         AI.__init__(self, start_pos)
         self.bullet = bullet
         self.idle_texture = loader.load_texture('art/enemy-idle.png')
-        self.walking_textures = [
-            loader.load_texture('art/enemy-walk-1.png'),
-            loader.load_texture('art/enemy-walk-2.png')
-        ]
-        self.walking_interval = Sequence(
-            Wait(0.2),
-            Func(self.set_texture, self.walking_textures[0]),
-            Wait(0.2),
-            Func(self.set_texture, self.walking_textures[1])
-        )
+
+        def make_walk_interval(texture1, texture2):
+            return Sequence(
+                Wait(0.2),
+                Func(self.set_texture, loader.load_texture(texture1)),
+                Wait(0.2),
+                Func(self.set_texture, loader.load_texture(texture2))
+            )
+
+        self.walking_right_interval = make_walk_interval('art/enemy-walk-right-1.png', 'art/enemy-walk-right-2.png')
+        self.walking_left_interval = make_walk_interval('art/enemy-walk-left-1.png', 'art/enemy-walk-left-2.png')
 
         self.movement_x = -1  # +/- based on direction
+        self.walking_dir = None
 
         self.model = loader.loadModelCopy('models/block.egg')
         self.model.set_transparency(TransparencyAttrib.M_alpha)
@@ -39,7 +41,6 @@ class EnemyAI(AI):
         self.model.reparent_to(self.bullet_np)
         self.bullet.attachRigidBody(self.bullet_node)
         self.set_texture(self.idle_texture)
-        self.walking_interval.loop()
 
     def set_texture(self, texture):
         self.model.set_texture(texture)
@@ -56,6 +57,16 @@ class EnemyAI(AI):
         self.check_for_obstacles()
         vel = self.bullet_node.get_linear_velocity()
         self.bullet_node.set_linear_velocity(Vec3(self.movement_x, 0, vel.z))
+
+        # check if it switched directions and loop the other animation
+        if self.movement_x != self.walking_dir:
+            if self.movement_x > 0:
+                self.walking_left_interval.finish()
+                self.walking_right_interval.loop()
+            else:
+                self.walking_right_interval.finish()
+                self.walking_left_interval.loop()
+            self.walking_dir = self.movement_x
 
     def update(self, dt):
         self.move(dt)
