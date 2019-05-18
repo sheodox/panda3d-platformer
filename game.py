@@ -60,14 +60,17 @@ class Game:
         self.paused = True
         self.ui.show_lose()
 
+    def died(self):
+        self.game_data['lives'] -= 1
+        if self.game_data['lives'] == 0:
+            self.lost()
+        self.player.respawn()
+
     def update(self, dt, task):
         self.bullet.doPhysics(dt)
         kill_check = self.bullet.contact_test_pair(self.world_gen.kill_plane_node, self.player.actor_bullet_node)
         if kill_check.get_num_contacts() == 1:
-            self.game_data['lives'] -= 1
-            if self.game_data['lives'] == 0:
-                self.lost()
-            self.player.respawn()
+            self.died()
 
         win_check = self.bullet.contact_test_pair(self.world_gen.goal_node, self.player.actor_bullet_node)
         if win_check.get_num_contacts() == 1:

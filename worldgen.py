@@ -11,6 +11,7 @@ class WorldGen:
         self.bullet = bullet
         self.coin_nps = {}
         self.enemies = []
+        self.enemy_map = {}
         self.parser = LevelParser(level_name)
         self.level = level = self.parser.load_level_file()
         for block in level.blocks:
@@ -30,7 +31,9 @@ class WorldGen:
 
     def _create_enemies(self):
         for pos in self.level.enemies:
-            self.enemies.append(EnemyAI(pos, self.bullet))
+            enemy = EnemyAI(pos, self.bullet)
+            self.enemies.append(enemy)
+            self.enemy_map[enemy.bullet_node] = enemy
 
     def update(self, dt, task):
         for np in render.findAllMatches('coin'):
@@ -63,6 +66,9 @@ class WorldGen:
         self.bullet.removeGhost(node)
         self.coin_nps[node].remove_node()
         del self.coin_nps[node]
+
+    def kill_enemy(self, node):
+        self.enemy_map[node].died()
 
     def _create_kill_plane(self):
         # kill plane

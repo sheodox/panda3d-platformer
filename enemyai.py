@@ -9,6 +9,7 @@ from ai import AI
 class EnemyAI(AI):
     def __init__(self, start_pos, bullet):
         AI.__init__(self, start_pos)
+        self.dead = False
         self.bullet = bullet
         self.idle_texture = loader.load_texture('art/enemy-idle.png')
 
@@ -53,7 +54,14 @@ class EnemyAI(AI):
         if rc_result.has_hit() and rc_result.getNode().getName() != 'player':
             self.movement_x *= -1
 
+    def died(self):
+        self.dead = True
+        self.bullet_np.remove_node()
+        self.bullet.removeRigidBody(self.bullet_node)
+
     def move(self, dt):
+        if self.dead:
+            return
         self.check_for_obstacles()
         vel = self.bullet_node.get_linear_velocity()
         self.bullet_node.set_linear_velocity(Vec3(self.movement_x, 0, vel.z))

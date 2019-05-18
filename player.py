@@ -42,7 +42,37 @@ class Player(Character):
         if not self.game.paused:
             self.controls()
             self.center_camera()
+            self.check_enemy_collision()
         return task.cont
+
+    def ray_check_by_offset(self, dirVec, offsetVec=Vec3(0, 0, 0)):
+        pos = self.actor_bullet_np.get_pos()
+        rc = self.bullet.rayTestClosest(pos + offsetVec, pos + dirVec)
+        if rc.has_hit():
+            node = rc.getNode()
+            return node.getName(), node
+        return None, None
+
+    def check_enemy_collision(self):
+        right_collision, _ = self.ray_check_by_offset(Vec3(0.6, 0, 0))
+        left_collision, _ = self.ray_check_by_offset(Vec3(-0.6, 0, 0))
+        down_checks = [
+            self.ray_check_by_offset(Vec3(0, 0, -0.6)),
+            self.ray_check_by_offset(Vec3(0, 0, -0.6), offsetVec=Vec3(0.2, 0, 0)),
+            self.ray_check_by_offset(Vec3(0, 0, -0.6), offsetVec=Vec3(-0.2, 0, 0)),
+        ]
+
+        if right_collision == 'enemy' or left_collision == 'enemy':
+            self.game.died()
+
+        for rc in down_checks:
+            down_collision, killed_enemy = rc
+            if down_collision == 'enemy':
+                self.game.world_gen.kill_enemy(killed_enemy)
+                vel = self.actor_bullet_node.get_linear_velocity()
+                self.actor_bullet_node.set_linear_velocity((
+                    vel.x, 0, 40
+            ))
 
     def center_camera(self):
         goal_pos = self.actor_bullet_np.get_pos() + Vec3(self.camera_side_lookahead, -25, 3)
