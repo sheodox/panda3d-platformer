@@ -10,7 +10,7 @@ from worldgen import WorldGen
 
 
 class Game:
-    def __init__(self, main, level_name):
+    def __init__(self, main, level_name, stats):
         self.main = main
         self.paused = False
         self.bullet = BulletWorld()
@@ -20,8 +20,8 @@ class Game:
         self.ui = GameUI()
         self.time_max = 300
         self.game_data = {
-            'coins': 0,
-            'lives': 3,
+            'coins': 0 if stats['coins'] is None else stats['coins'],
+            'lives': 3 if stats['lives'] is None else stats['lives'],
             'time': self.time_max
         }
         self.world_gen = WorldGen(main, level_name, self.bullet)
@@ -59,6 +59,10 @@ class Game:
     def won(self):
         self.paused = True
         self.ui.show_win()
+        self.main.later_task(self.next_level, 'next-level', 2)
+
+    def next_level(self, _):
+        self.main.next_level(self.game_data)
 
     def lost(self):
         self.paused = True

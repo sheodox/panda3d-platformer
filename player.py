@@ -23,7 +23,7 @@ class Player(Character):
         self.player_actor = Actor('models/block.egg')
         self.player_actor.set_sx(0.5)
         self.forces = {
-            'jump': 800,
+            'jump': 1000,
             'move': 40
         }
         self.camera_move_max_delta = 0.5

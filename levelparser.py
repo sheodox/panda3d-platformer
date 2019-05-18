@@ -30,7 +30,7 @@ class LevelParser:
         assert all(len(row) == len(rows[0]) for row in rows), f'{assert_prefix}all rows must be the same length'
 
     def load_level_file(self):
-        with open(f'levels/{self.level_name}.lvl') as file:
+        with open(f'levels/{self.level_name}') as file:
             rows = [line.rstrip('\n') for line in file.readlines()]
             self._assert_level_integrity(rows)
             # make it read bottom up, so row/column indices can be used as 3d space coordinates
